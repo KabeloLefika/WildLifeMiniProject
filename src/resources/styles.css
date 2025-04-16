@@ -1,0 +1,253 @@
+/* styles.css */
+
+/* Global Dark Mode */
+.root, .dashboard {
+    -fx-background-color: #121212;  /* Dark background for the whole app */
+    -fx-text-fill: #ffffff;
+    -fx-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Title Labels */
+.title-label {
+    -fx-font-size: 48px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 2);
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: linear-gradient(#2D3748, #212B3D);
+    -fx-padding: 24px;
+}
+
+.nav-button {
+    -fx-padding: 15 30;
+    -fx-font-size: 16px;
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #424242;
+    -fx-border-radius: 30;
+    -fx-background-radius: 30;
+    -fx-cursor: hand;
+    -fx-transition: background-color 0.2s ease;
+}
+
+.nav-button:hover {
+    -fx-background-color: #3A4760;
+}
+
+/* Logout Button (Sidebar) */
+.logout-button {
+    -fx-font-weight: 600;
+    -fx-border-color: #FF5252;
+    -fx-border-width: 2px;
+    -fx-text-fill: #FF5252;
+    -fx-background-color: transparent;
+    -fx-padding: 0 24px;
+}
+
+/* Metric Cards */
+.metric-box {
+    -fx-background-color: #1E1E1E;
+    -fx-padding: 24px;
+    -fx-border-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 3);
+    -fx-min-width: 280px;
+}
+
+.metric-value {
+    -fx-font-size: 32px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #2EC4B6;
+    -fx-padding: 12px 0;
+}
+
+.metric-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #cccccc;
+}
+
+/* Quick Actions */
+.quick-button {
+    -fx-font-size: 16px;
+    -fx-font-weight: 500;
+    -fx-padding: 12px 24px;
+    -fx-border-radius: 24px;
+    -fx-background-color: #616161;
+    -fx-text-fill: #ffffff;
+    -fx-cursor: pointer;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 1);
+}
+
+.quick-button:hover {
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 2);
+}
+
+/* Zoom Buttons */
+.zoom-button {
+    -fx-background-color: rgba(255, 255, 255, 0.8);
+    -fx-background-radius: 15;
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+    -fx-font-weight: bold;
+    -fx-font-size: 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+}
+.zoom-button:hover {
+    -fx-background-color: rgba(220, 220, 220, 0.9);
+}
+
+/* Status / Message Area */
+.status-label {
+    -fx-text-fill: #FFEB3B;     /* Bright yellow text */
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-color: #333333; /* Dark background for contrast */
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 5px;
+}
+
+/* List Cells */
+.list-cell {
+    -fx-font-size: 16px;
+    -fx-font-weight: 400;
+}
+
+.list-cell:hover {
+    -fx-background-color: #3A3A3A;
+    -fx-text-fill: #ffffff;
+}
+
+/* Typography */
+.label {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-smoothing-type: lcd;
+}
+
+/* Headings */
+.heading {
+    -fx-font-size: 24px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #ffffff;
+}
+
+
+/*dark theme*/
+
+
+.login-root {
+    -fx-background-color: #121212;
+}
+
+.title-label {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.form-label {
+    -fx-text-fill: #bbbbbb;
+    -fx-font-size: 14px;
+}
+
+.text-field {
+    -fx-background-color: #1e1e1e;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #888888;
+    -fx-border-color: #333333;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8 12;
+}
+
+.text-field:focused {
+    -fx-border-color: #6200ee;
+}
+
+.login-button {
+    -fx-background-color: #6200ee;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+}
+
+.login-button:hover {
+    -fx-background-color: #3700b3;
+}
+
+.register-link {
+    -fx-text-fill: #03dac6;
+}
+
+.register-link:hover {
+    -fx-text-fill: #00bfa5;
+}
+
+.register-root {
+    -fx-background-color: #121212;
+}
+
+.title-label {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.form-label {
+    -fx-text-fill: #bbbbbb;
+    -fx-font-size: 14px;
+}
+
+.text-field {
+    -fx-background-color: #1e1e1e;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #888888;
+    -fx-border-color: #333333;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8 12;
+}
+
+.text-field:focused {
+    -fx-border-color: #6200ee;
+}
+
+.combo-box {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #333333;
+    -fx-prompt-text-fill: #888888;
+    -fx-text-fill: white;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.radio-button {
+    -fx-text-fill: #ffffff;
+}
+
+.register-button {
+    -fx-background-color: #6200ee;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+}
+
+.register-button:hover {
+    -fx-background-color: #3700b3;
+}
+
+.login-link {
+    -fx-text-fill: #03dac6;
+}
+
+.login-link:hover {
+    -fx-text-fill: #00bfa5;
+}

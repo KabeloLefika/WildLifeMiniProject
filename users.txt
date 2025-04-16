@@ -1,0 +1,4 @@
+Xolani,Mavuso,xolani@gmail.com,123,User
+Kabelo,Lefika,kabelo@gmail.com,1234,User
+Gift,gift,gift@gmail.com,123,User
+Sbu,Siso,sbu@gmail.com,12345,User
