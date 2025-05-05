@@ -13,6 +13,15 @@ public class ImageNode extends Node {
         this.cost = cost;
         this.type = type;
     }
+    
+    
+    // Copy constructor
+    public ImageNode(ImageNode other) {
+        super(other);
+        this.type = other.type;
+        this.cost = other.cost;
+    }
+    
 
     public double getCost() {
         return cost;

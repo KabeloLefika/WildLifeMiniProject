@@ -19,8 +19,13 @@ import java.util.Optional;
 import javafx.scene.control.ButtonType;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MainDashboard extends BorderPane {
     private VBox sidebar;
@@ -43,6 +48,7 @@ public class MainDashboard extends BorderPane {
     private boolean corridorsHighlighted = false;
     
     private CriticalCorridorAnalyzer corridorAnalyzer = new CriticalCorridorAnalyzer();
+    private static final double CONNECTION_DISTANCE = 50;
 
     public MainDashboard(Stage primaryStage) {
         graph = Graph.getInstance();
@@ -64,9 +70,9 @@ public class MainDashboard extends BorderPane {
         setTop(topPane);
         setBottom(createBottomPane());
         
-        // Styling the background to be more dark
+        // Styling the background
         setBackground(new Background(
-            new BackgroundFill(Color.web("#121212"), CornerRadii.EMPTY, Insets.EMPTY)));
+            new BackgroundFill(Color.web("#F0F3F8"), CornerRadii.EMPTY, Insets.EMPTY)));
         getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
     }
     
@@ -117,12 +123,22 @@ public class MainDashboard extends BorderPane {
         quickAccess.setAlignment(Pos.CENTER);
         bottomPane.setCenter(quickAccess);
         
-        // Initialize status label if necessary and position it to the right.
+        //MAking the status more visible through a container at the bottom right
+        HBox statusContainer = new HBox();
+        statusContainer.getStyleClass().add("status-container");
+        statusContainer.setAlignment(Pos.CENTER_RIGHT);
+
+        Label statusTitle = new Label("Status: ");
+        statusTitle.getStyleClass().add("status-title");
+        
+        // Initialize status label if necessary and position it inthe container.
         if (statusLabel == null) {
             statusLabel = new Label("Ready");
+            statusLabel.getStyleClass().add("status-message");
         }
-        BorderPane.setAlignment(statusLabel, Pos.CENTER_RIGHT);
-        bottomPane.setRight(statusLabel);
+        statusContainer.getChildren().addAll(statusTitle, statusLabel);
+        // BorderPane.setAlignment(statusLabel, Pos.CENTER_RIGHT);
+        bottomPane.setRight(statusContainer);
         
         return bottomPane;
     }
@@ -133,7 +149,7 @@ public class MainDashboard extends BorderPane {
         sidebar.setPadding(new Insets(20));
         sidebar.setAlignment(Pos.TOP_CENTER);
 
-        String[] menuItems = {"map_viewer", "data_management", "reports", "settings"};
+        String[] menuItems = {"map_viewer"};
         for (String item : menuItems) {
             Button btn = createSidebarButton(item);
             if (item.equals("map_viewer")) {
@@ -195,7 +211,7 @@ public class MainDashboard extends BorderPane {
         globalProgress.setVisible(true);
         
         currentGraphView = new GraphView();
-        currentGraphView.getView().setPrefSize(500, 700); // Set preferred size for graph
+        currentGraphView.getView().setPrefSize(600, 700); // Set preferred size for graph
         
         currentMapViewer = new MapViewer(graph, currentGraphView, () -> {
             globalProgress.setVisible(false);
@@ -206,14 +222,31 @@ public class MainDashboard extends BorderPane {
         mapViewerContainer = new VBox(10);
         mapViewerContainer.setPrefSize(500, 700); // Fixed size for map container
         Label mapTitle = new Label("Original Map");
-        mapTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        
+        mapTitle.setStyle(
+        	    "-fx-font-size: 23px; " +
+        	    "-fx-font-weight: bold; " +
+        	    "-fx-text-fill: white; " +
+        	    "-fx-padding: 8 16; " + // Added padding
+        	    "-fx-background-color: rgba(0, 0, 0, 0.7);" // Semi-transparent background
+        	);
+       // mapTitle.setStyle("-fx-font-size: 23px; -fx-font-weight: bold;");
         mapViewerContainer.getChildren().addAll(mapTitle, currentMapViewer.getView());
         mapViewerContainer.setAlignment(Pos.TOP_CENTER);
 
         graphViewContainer = new VBox(10);
-        graphViewContainer.setPrefSize(500, 700); // Fixed size for graph container
+        graphViewContainer.setPrefSize(600, 800); // Fixed size for graph container
         Label graphTitle = new Label("Network Graph");
-        graphTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        
+        graphTitle.setStyle(
+        	    "-fx-font-size: 23px; " +
+        	    "-fx-font-weight: bold; " +
+        	    "-fx-text-fill: white; " +
+        	    "-fx-padding: 8 16; " +
+        	    "-fx-background-color: rgba(0, 0, 0, 0.7);"
+        	);
+        
+        //graphTitle.setStyle("-fx-font-size: 23px; -fx-font-weight: bold;");
         graphViewContainer.getChildren().addAll(graphTitle, currentGraphView.getView());
         graphViewContainer.setAlignment(Pos.TOP_CENTER);
 
@@ -225,11 +258,37 @@ public class MainDashboard extends BorderPane {
         mapGraphContainer.getChildren().addAll(mapViewerContainer, graphViewContainer);
 
         Button toggleImageButton = new Button("Hide Original Image");
+        
+        
+        toggleImageButton.setStyle(
+            "-fx-background-color: #2196F3; " + // Blue background
+            "-fx-text-fill: white; " +
+            "-fx-font-weight: bold; " +
+            "-fx-padding: 10 20; " + // Increased padding
+            "-fx-background-radius: 8px;" // Rounded corners
+        );
+        
+        toggleImageButton.setOnMouseEntered(e -> 
+        toggleImageButton.setStyle(toggleImageButton.getStyle() + 
+            "-fx-background-color: #1E88E5;")); // Darker blue on hover
+    toggleImageButton.setOnMouseExited(e -> 
+        toggleImageButton.setStyle(toggleImageButton.getStyle().replace(
+            "#1E88E5", "#2196F3")));
+        
         toggleImageButton.setOnAction(e -> toggleOriginalImage(toggleImageButton));
+        
+        HBox buttonContainer = new HBox(toggleImageButton);
+        buttonContainer.setAlignment(Pos.CENTER);
+        buttonContainer.setPadding(new Insets(10));
 
         VBox mainContainer = new VBox(10);
         mainContainer.setAlignment(Pos.CENTER);
-        mainContainer.getChildren().addAll(toggleImageButton, mapGraphContainer);
+        mainContainer.getChildren().addAll(buttonContainer, mapGraphContainer);
+
+		/*
+		 * VBox mainContainer = new VBox(10); mainContainer.setAlignment(Pos.CENTER);
+		 * mainContainer.getChildren().addAll(toggleImageButton, mapGraphContainer);
+		 */
         
         setCenter(mainContainer);
         showStatus("");
@@ -264,15 +323,18 @@ public class MainDashboard extends BorderPane {
     private void showStatus(String message) {
         if (statusLabel == null) {
             statusLabel = new Label();
-            statusLabel.getStyleClass().add("status-label");
         }
         statusLabel.setText(message);
     }
+    
+    
 
     // Clears the start and end nodes for path analysis.
     private void resetPathSelection() {
         startNode = null;
         endNode = null;
+        currentMapViewer.clearMarkers();
+        currentGraphView.clearNodeHighlights();
         showStatus("Path selection reset.");
     }
     
@@ -298,13 +360,36 @@ public class MainDashboard extends BorderPane {
         quickAccessBar.getStyleClass().add("quick-access-bar");
 
         Button addNodeBtn = createQuickButton("Add Node", "#4CAF50");
+        addNodeBtn.setOnMouseEntered(e -> 
+        addNodeBtn.setStyle(addNodeBtn.getStyle() + 
+            "-fx-background-color: #1E88E5;")); // Darker blue on hover
+        addNodeBtn.setOnMouseExited(e -> 
+        addNodeBtn.setStyle(addNodeBtn.getStyle().replace(
+            "#1E88E5", "#2196F3")));
+        
         addNodeBtn.setOnAction(e -> switchToNoteMode());
 
         Button findPathsButton = createQuickButton("Find Paths", "#2196F3");
+        
+        findPathsButton.setOnMouseEntered(e -> 
+        findPathsButton.setStyle(findPathsButton.getStyle() + 
+            "-fx-background-color: #1E88E5;")); // Darker blue on hover
+        findPathsButton.setOnMouseExited(e -> 
+        findPathsButton.setStyle(findPathsButton.getStyle().replace(
+            "#1E88E5", "#2196F3")));
+       
         findPathsButton.setOnAction(e -> showPathOptions());
+        
+        
 
         Button criticalCorridorsBtn = createQuickButton("Critical Corridors", "#FF9800");
-        criticalCorridorsBtn.setOnAction(e -> analyzeCriticalCorridors());
+        criticalCorridorsBtn.setOnMouseEntered(e -> 
+        findPathsButton.setStyle(criticalCorridorsBtn.getStyle() + 
+            "-fx-background-color: #1E88E5;")); // Darker blue on hover
+        criticalCorridorsBtn.setOnMouseExited(e -> 
+        findPathsButton.setStyle(criticalCorridorsBtn.getStyle().replace(
+            "#1E88E5", "#2196F3")));
+      
 
         quickAccessBar.getChildren().addAll(addNodeBtn, findPathsButton, criticalCorridorsBtn);
         return quickAccessBar;
@@ -333,6 +418,16 @@ public class MainDashboard extends BorderPane {
             showStatus("Critical corridors highlighted");
         }
     }
+    
+    private void clearAllHighlights() {
+        if(currentGraphView != null) currentGraphView.clearHighlights();
+        if(currentMapViewer != null) {
+        	startNode = null;
+            endNode = null;
+            currentMapViewer.clearMarkers();
+            currentMapViewer.clearHighlights();
+        } 
+    }
 
     
     private void showPathOptions() {
@@ -343,84 +438,88 @@ public class MainDashboard extends BorderPane {
 
         Button poacherPathsBtn = createQuickButton("Poacher Paths", "#FF5722");
         poacherPathsBtn.setOnAction(e -> {
-        	//Adding poachers
-            enablePoacherAnalysis();
-            //Funding the path
-            executePoacherDijkstra();
+          
+            clearAllHighlights();
+            highlightPoacherPaths();
         });
-
+		
         Button backBtn = createQuickButton("Back", "#9E9E9E");
         backBtn.setOnAction(e -> resetToDefaultQuickAccess());
 
         quickAccessBar.getChildren().addAll(analyzePathsBtn, poacherPathsBtn, backBtn);
     }
-
     
 
-
-    private Button createQuickButton(String text, String color) {
+    private Button createQuickButton(String text, String baseColorHex) {
         Button btn = new Button(text);
-        btn.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-background-radius: 5;");
-        btn.getStyleClass().add("quick-action-button");
+        
+        // Color adjustments for different states
+        Color baseColor = Color.web(baseColorHex);
+        Color hoverColor = baseColor.deriveColor(0, 1, 1.15, 1); // 15% lighter
+        Color pressedColor = baseColor.deriveColor(0, 1, 0.85, 1); // 15% darker
+        
+        // Convert to hex strings
+        String hoverHex = toHexString(hoverColor);
+        String pressedHex = toHexString(pressedColor);
+        
+        // Base style
+        String baseStyle = String.format(
+            "-fx-background-color: %s; " +
+            "-fx-text-fill: white; " +
+            "-fx-font-weight: bold; " +
+            "-fx-background-radius: 8px; " +
+            "-fx-padding: 12 24;", 
+            baseColorHex);
+        
+        btn.setStyle(baseStyle);
+        
+        // Hover effects
+        btn.setOnMouseEntered(e -> {
+            String hoverStyle = baseStyle.replace(baseColorHex, hoverHex);
+            btn.setStyle(hoverStyle);
+        });
+        
+        btn.setOnMouseExited(e -> btn.setStyle(baseStyle));
+        
+        // Pressed effects
+        btn.setOnMousePressed(e -> {
+            String pressedStyle = baseStyle.replace(baseColorHex, pressedHex);
+            btn.setStyle(pressedStyle);
+        });
+        
+        btn.setOnMouseReleased(e -> btn.setStyle(baseStyle));
+        
         btn.setPrefSize(180, 50);
         return btn;
     }
+
+    // Helper to convert Color to hex string
+    private String toHexString(Color color) {
+        return String.format("#%02X%02X%02X",
+            (int)(color.getRed() * 255),
+            (int)(color.getGreen() * 255),
+            (int)(color.getBlue() * 255));
+    }
     
-    private void enablePoacherAnalysis() {
-    	PoacherAnalyzer pa = new PoacherAnalyzer();
-        pa.enablePoacherAnalysis();
+     
+ // New method to reset the graph
+    private void resetGraph() {
+        System.out.println("ResetGraph() called");  // Debug statement
+        Graph.getInstance().resetToInitialState();
         
-        // Update the graph view (and map viewer if needed) so new nodes are visible.
         if (currentGraphView != null) {
+            System.out.println("Updating graph view");
             currentGraphView.update();
         }
         
-        showStatus("Poacher nodes added on map edges.");
+        if (currentMapViewer != null) {
+            System.out.println("Clearing map highlights");
+            currentMapViewer.clearHighlights();
+        }
         
+        showStatus("Graph fully reset to original state.");
+        System.out.println("Reset complete status shown");
     }
-
-    private void executePoacherDijkstra() {
-        Graph g = Graph.getInstance();
-        List<Node> allPoacherNodes = new ArrayList<>();
-        
-        // Collect all poacher nodes.
-        for (Node n : g.getNodes()) {
-            if (n instanceof ImageNode && ((ImageNode) n).getType().equals("poacher")) {
-                allPoacherNodes.add(n);
-            }
-        }
-        
-        if (allPoacherNodes.isEmpty()) {
-            showStatus("No poacher node found. Please enable poacher analysis first.");
-            return;
-        }
-        
-        PoacherAnalyzer pa = new PoacherAnalyzer();
-        boolean pathFound = false;
-        
-        // Loop through each poacher node and append its path highlight.
-        for (Node poacherStart : allPoacherNodes) {
-            List<Node> path = pa.executePoacherDijstra(poacherStart);
-            if (path != null && !path.isEmpty()) {
-                pathFound = true;
-                if (currentGraphView != null) {
-                    currentGraphView.appendPathHighlight(path);
-                }
-                if (currentMapViewer != null) {
-                    currentMapViewer.appendPathHighlight(path);
-                }
-            } else {
-                System.out.println("No path found for poacher at: (" + poacherStart.getX() + ", " + poacherStart.getY() + ")");
-            }
-        }
-        
-        if (pathFound) {
-            showStatus("All poacher paths highlighted.");
-        } else {
-            showStatus("No forest reachable from any poacher node.");
-        }
-    }
-
 
     
  // Modify switchToNoteMode method
@@ -434,12 +533,16 @@ public class MainDashboard extends BorderPane {
         
         quickAccessBar.getChildren().clear();
 
-        Button addGrass = createQuickButton("Add Grass", "#8BC34A");
+        Button addGrass = createQuickButton("Back", "#8BC34A");
         Button addWater = createQuickButton("Add Water", "#03A9F4");
         Button addTrees = createQuickButton("Add Trees", "#4CAF50");
         Button addLand = createQuickButton("Add Land", "#795548");
         Button remove = createQuickButton("Remove", "#F44336");
         Button reset = createQuickButton("Reset", "#9E9E9E");
+        reset.setOnAction(e -> {
+            resetGraph();
+            //resetToDefaultQuickAccess();
+        });
 
         // Set up button actions
         addWater.setOnAction(e -> {
@@ -465,6 +568,8 @@ public class MainDashboard extends BorderPane {
             setupNodeConversionHandler();
             showStatus("Grass mode: Click nodes to convert");
         });
+        
+        addGrass.setOnAction(e -> resetToDefaultQuickAccess()); 
 
         remove.setOnAction(e -> {
             currentNodeType = "remove";
@@ -472,31 +577,80 @@ public class MainDashboard extends BorderPane {
             showStatus("Removal mode: Click nodes to delete");
         });
 
-        reset.setOnAction(e -> resetToDefaultQuickAccess());
+        reset.setOnAction(e -> resetGraph());
 
         quickAccessBar.getChildren().addAll(addGrass, addWater, addTrees, addLand, remove, reset);
     }
+    
     
     private void setupNodeConversionHandler() {
         if (currentGraphView != null) {
             currentGraphView.enableNodeSelection(selectedNode -> {
                 if (currentNodeType.equals("remove")) {
-                    // Handle node removal
-                    Graph.getInstance().removeNode(selectedNode);
-                    currentGraphView.update();
-                    currentMapViewer.getView(); // Refresh map view if needed
+                    removeNodeAndConnections(selectedNode);
+                    currentGraphView.update(); // Full update needed for removal
                 } else if (selectedNode instanceof ImageNode) {
-                    // Convert node type
                     ImageNode imageNode = (ImageNode) selectedNode;
+                    String oldType = imageNode.getType();
                     imageNode.setType(currentNodeType);
-                    currentGraphView.update();
+                    
+                    // Determine if edges were modified (water-related changes)
+                    boolean wasWater = oldType.equalsIgnoreCase("water");
+                    boolean isNowWater = currentNodeType.equalsIgnoreCase("water");
+                    
+                    if (wasWater || isNowWater) {
+                        if (wasWater) {
+                            connectToNearbyNodes(imageNode);
+                        }
+                        if (isNowWater) {
+                            removeWaterConnections(imageNode);
+                        }
+                        currentGraphView.update(); // Full update for edge changes
+                    } else {
+                        currentGraphView.updateNodeAppearance(imageNode); // Partial update
+                    }
                 }
             });
         }
     }
+    
+    private void removeNodeAndConnections(Node node) {
+        Graph graph = Graph.getInstance();
+        graph.removeNode(node);
+    }
+
+
+    private void removeWaterConnections(Node node) {
+        Graph graph = Graph.getInstance();
+        graph.getEdges().removeIf(edge -> 
+            edge.getFrom().equals(node) || edge.getTo().equals(node)
+        );
+    }
+
+    private void connectToNearbyNodes(Node node) {
+        Graph graph = Graph.getInstance();
+        for (Node other : graph.getNodes()) {
+            if (!other.equals(node) && !isWaterNode(other)) {
+                double dx = node.getX() - other.getX();
+                double dy = node.getY() - other.getY();
+                double distance = Math.sqrt(dx*dx + dy*dy);
+                
+                if (distance <= CONNECTION_DISTANCE) {
+                    graph.addEdge(new Edge(node, other));
+                    graph.addEdge(new Edge(other, node));
+                }
+            }
+        }
+    }
+
+    private boolean isWaterNode(Node node) {
+        return (node instanceof ImageNode) && 
+              ((ImageNode) node).getType().equalsIgnoreCase("water");
+    }
 
     
     private void resetToDefaultQuickAccess() {
+    	//resetGraph();
         currentNodeType = null;
         corridorsHighlighted = false; // Reset corridor state
         quickAccessBar.getChildren().clear();
@@ -513,23 +667,33 @@ public class MainDashboard extends BorderPane {
         quickAccessBar.getChildren().addAll(addNodeBtn, findPathsButton, criticalCorridorsBtn);
         showStatus("Ready");
     }
+    
     // When analyze paths is clicked, enable path selection and display instructional animations.
     private void enablePathAnalysisMode() {
         MapViewer currentViewer = getCurrentMapViewer();
         GraphView currentGraphView = getCurrentGraphView();
         
         if (currentViewer != null && currentGraphView != null) {
+            // Clear previous highlights when starting new path analysis
+            clearAllHighlights();
             currentViewer.showInstruction("Select start point on map or graph", 3000);
             
             // Unified selection handler for both views
             Consumer<Node> selectionHandler = selectedNode -> {
                 if (startNode == null) {
+                    // Selecting start node
+                    currentMapViewer.clearMarkers();
+                    currentGraphView.clearNodeHighlights();
                     startNode = selectedNode;
+                    currentMapViewer.highlightStartNode(startNode);
+                    currentGraphView.highlightStartNode(startNode);
                     currentViewer.showInstruction("Select end point", 3000);
                 } else {
+                    // Selecting end node
                     endNode = selectedNode;
+                    currentMapViewer.highlightEndNode(endNode);
+                    currentGraphView.highlightEndNode(endNode);
                     executeDijkstra();
-                    resetPathSelection();
                 }
             };
 
@@ -538,23 +702,25 @@ public class MainDashboard extends BorderPane {
         }
     }
 
+
     private void executeDijkstra() {
         if (startNode != null && endNode != null) {
-            // Clear existing corridor highlights
             corridorsHighlighted = false;
-            
             PathFinder pathFinder = new PathFinder();
             List<Node> path = pathFinder.findShortestPath(startNode, endNode);
+            
+            // Clear previous highlights before showing new path
+            clearAllHighlights();
             
             if (!path.isEmpty()) {
                 getCurrentGraphView().highlightPath(path);
                 getCurrentMapViewer().highlightPath(path);
             } else {
-                showStatus("No path found!");
+                showStatus("No valid path exists! Path blocked by water.");
             }
         }
     }
-
+    
     private GridPane createMetricsGrid() {
         GridPane grid = new GridPane();
         grid.setHgap(30);
@@ -609,4 +775,148 @@ public class MainDashboard extends BorderPane {
         box.getChildren().addAll(valueLabel, descLabel);
         return box;
     }
+    
+    private void highlightPoacherPaths() {
+        clearAllHighlights();
+
+        Node criticalForest = findMostDenseForestNode();
+        if (criticalForest == null || isEdgeNode(criticalForest)) {
+            showStatus("No valid central forest node found!");
+            return;
+        }
+
+        List<Node> edgeNodes = findEdgeNodes();
+        System.out.println("Selected " + edgeNodes.size() + " representative edge nodes");
+
+        // Highlight critical node
+        currentGraphView.highlightCriticalNode(criticalForest);
+        System.out.println("Critical forest at: " + criticalForest.getX() + "," + criticalForest.getY());
+
+        // Find and sort paths by length
+        List<PathResult> allPaths = new ArrayList<>();
+        PathFinder finder = new PathFinder();
+        
+        for (Node edgeNode : edgeNodes) {
+            List<Node> path = finder.findShortestPath(edgeNode, criticalForest);
+            if (!path.isEmpty() && path.size() > 2) { // Filter trivial paths
+                allPaths.add(new PathResult(path, calculatePathLength(path)));
+            }
+        }
+
+        // Select top 10 shortest paths
+        allPaths.sort(Comparator.comparingDouble(p -> p.length));
+        List<List<Node>> topPaths = allPaths.stream()
+            .limit(10)
+            .map(p -> p.path)
+            .collect(Collectors.toList());
+
+        // Highlight selected paths
+        topPaths.forEach(path -> {
+            currentGraphView.appendPathHighlight(path);
+            currentMapViewer.appendPathHighlight(path);
+        });
+
+        showStatus("Showing " + topPaths.size() + " most critical paths");
+    }
+
+    private double calculatePathLength(List<Node> path) {
+        double length = 0;
+        for (int i = 0; i < path.size()-1; i++) {
+            Node a = path.get(i);
+            Node b = path.get(i+1);
+            length += Math.hypot(a.getX()-b.getX(), a.getY()-b.getY());
+        }
+        return length;
+    }
+
+    private static class PathResult {
+        List<Node> path;
+        double length;
+        
+        PathResult(List<Node> path, double length) {
+            this.path = path;
+            this.length = length;
+        }
+    }
+
+    private Node findMostDenseForestNode() {
+        double centerX = currentMapViewer.getImageWidth() / 2;
+        double centerY = currentMapViewer.getImageHeight() / 2;
+        
+        return Graph.getInstance().getNodes().stream()
+            .filter(n -> n instanceof ImageNode)
+            .filter(n -> ((ImageNode) n).getType().equals("forest"))
+            .filter(n -> !isEdgeNode(n))
+            .min(Comparator.comparingDouble(n -> 
+                Math.hypot(n.getX()-centerX, n.getY()-centerY))) // Prefer central nodes
+            .orElse(null);
+    }
+
+    private boolean isEdgeNode(Node node) {
+        List<Node> edgeNodes = findEdgeNodes();
+        return edgeNodes.contains(node);
+    }
+
+    
+
+    private List<Node> findEdgeNodes() {
+        double imageWidth = currentMapViewer.getImageWidth();
+        double imageHeight = currentMapViewer.getImageHeight();
+        
+        // More strict threshold (1% of image dimensions)
+        double xThreshold = imageWidth * 0.01;
+        double yThreshold = imageHeight * 0.01;
+        
+        List<Node> allEdges = Graph.getInstance().getNodes().stream()
+            .filter(n -> n.getX() <= xThreshold || 
+                        n.getX() >= imageWidth - xThreshold ||
+                        n.getY() <= yThreshold || 
+                        n.getY() >= imageHeight - yThreshold)
+            .collect(Collectors.toList());
+
+        // Select maximum 3 nodes per edge side
+        return selectRepresentativeEdges(allEdges, imageWidth, imageHeight);
+    }
+
+    private List<Node> selectRepresentativeEdges(List<Node> edges, double width, double height) {
+        List<Node> representatives = new ArrayList<>();
+        double edgeThreshold = Math.min(width, height) * 0.02;
+
+        Map<String, List<Node>> edgeGroups = new HashMap<>();
+        edgeGroups.put("left", new ArrayList<>());
+        edgeGroups.put("right", new ArrayList<>());
+        edgeGroups.put("top", new ArrayList<>());
+        edgeGroups.put("bottom", new ArrayList<>());
+
+        for (Node n : edges) {
+            if (n.getX() <= edgeThreshold) edgeGroups.get("left").add(n);
+            else if (n.getX() >= width - edgeThreshold) edgeGroups.get("right").add(n);
+            else if (n.getY() <= edgeThreshold) edgeGroups.get("top").add(n);
+            else if (n.getY() >= height - edgeThreshold) edgeGroups.get("bottom").add(n);
+        }
+
+        // Select max 3 nodes per side, spaced at least 5% apart
+        edgeGroups.forEach((side, nodes) -> {
+            if (!nodes.isEmpty()) {
+                nodes.sort(Comparator.comparingDouble(side.matches("left|right") ? 
+                    Node::getY : Node::getX));
+                
+                double lastPos = -1;
+                double spacing = side.matches("left|right") ? height * 0.05 : width * 0.05;
+                
+                for (Node n : nodes) {
+                    double currentPos = side.matches("left|right") ? n.getY() : n.getX();
+                    if (lastPos == -1 || Math.abs(currentPos - lastPos) >= spacing) {
+                        representatives.add(n);
+                        lastPos = currentPos;
+                        if (representatives.size() >= 12) break; // 3 per side * 4 sides
+                    }
+                }
+            }
+        });
+
+        return representatives.stream().distinct().collect(Collectors.toList());
+    }
+
+    
 }

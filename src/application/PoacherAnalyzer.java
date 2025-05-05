@@ -32,7 +32,7 @@ public class PoacherAnalyzer {
         // Create one poacher node on each side (center of top, bottom, left, and right)
         ImageNode poacherTop = new ImageNode((minX + maxX) / 2, minY, 0, "poacher");
         ImageNode poacherBottom = new ImageNode(((minX + maxX) / 2)+150, maxY, 0, "poacher");
-        ImageNode poacherLeft = new ImageNode(minX, ((minY + maxY) / 2) + 2, 0, "poacher");
+        ImageNode poacherLeft = new ImageNode(minX, ((minY + maxY) / 2) + 200, 0, "poacher");
         ImageNode poacherRight = new ImageNode(maxX, (minY + maxY) / 2, 0, "poacher");
         
         // Add the poacher nodes to the graph

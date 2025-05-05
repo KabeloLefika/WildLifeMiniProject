@@ -34,6 +34,10 @@ public class MapViewer {
     private double originalWidth, originalHeight;
     private Consumer<Node> nodeSelectionCallback;
     
+    private ImageView imageView;
+    
+    private Circle startMarker, endMarker;
+    
     // Overlay pane for drawing the shortest path and instructions on the image
     private final Pane overlay = new Pane();
     private Label instructionLabel; // For instructions
@@ -47,7 +51,16 @@ public class MapViewer {
         this.onLoadComplete = onLoadComplete;
         setupUI();
     }
+    
+ // Add these methods
+    public double getImageWidth() {
+        return mapView.getImage() != null ? mapView.getImage().getWidth() : 0;
+    }
 
+    public double getImageHeight() {
+        return mapView.getImage() != null ? mapView.getImage().getHeight() : 0;
+    }
+    
     private void setupUI() {
         mapView.setPreserveRatio(true);
         loadProgress.setPrefWidth(200);
@@ -80,6 +93,41 @@ public class MapViewer {
         setupNodeClickHandler();
     }
     
+    
+    public void highlightStartNode(Node node) {
+        clearStartMarker();
+        double scale = zoomLevel.get();
+        startMarker = new Circle(node.getX() * scale, node.getY() * scale, 10, Color.GREEN);
+        startMarker.setStroke(Color.BLACK);
+        overlay.getChildren().add(startMarker);
+    }
+
+    public void highlightEndNode(Node node) {
+        clearEndMarker();
+        double scale = zoomLevel.get();
+        endMarker = new Circle(node.getX() * scale, node.getY() * scale, 10, Color.RED);
+        endMarker.setStroke(Color.BLACK);
+        overlay.getChildren().add(endMarker);
+    }
+
+    public void clearStartMarker() {
+        if (startMarker != null) {
+            overlay.getChildren().remove(startMarker);
+            startMarker = null;
+        }
+    }
+
+    public void clearEndMarker() {
+        if (endMarker != null) {
+            overlay.getChildren().remove(endMarker);
+            endMarker = null;
+        }
+    }
+
+    public void clearMarkers() {
+        clearStartMarker();
+        clearEndMarker();
+    }
     private void setupNodeClickHandler() {
         mapView.setOnMouseClicked(event -> {
             if (nodeSelectionCallback != null && mapView.getImage() != null) {
@@ -119,6 +167,21 @@ public class MapViewer {
         container.setAlignment(Pos.CENTER);
 
         Button uploadBtn = new Button("Upload Map Image");
+        
+        uploadBtn.setStyle(
+                "-fx-background-color: #2196F3; " + // Blue background
+                "-fx-text-fill: white; " +
+                "-fx-font-weight: bold; " +
+                "-fx-padding: 10 20; " + // Increased padding
+                "-fx-background-radius: 8px;" // Rounded corners
+            );
+        
+        uploadBtn.setOnMouseEntered(e -> 
+        uploadBtn.setStyle(uploadBtn.getStyle() + 
+            "-fx-background-color: #1E88E5;")); // Darker blue on hover
+        uploadBtn.setOnMouseExited(e -> 
+        uploadBtn.setStyle(uploadBtn.getStyle().replace(
+            "#1E88E5", "#2196F3")));
         uploadBtn.setOnAction(e -> handleImageUpload());
 
         // Create zoom controls separately
@@ -186,6 +249,7 @@ public class MapViewer {
         }
     }
 
+ // MapViewer.java
     private void handleImageUpload() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(
@@ -197,13 +261,16 @@ public class MapViewer {
             Image image = new Image(file.toURI().toString(), true);
             
             image.progressProperty().addListener((obs, old, progress) -> {
-                loadProgress.setProgress(progress.doubleValue());
                 if (progress.doubleValue() == 1.0) {
                     loadProgress.setVisible(false);
                     mapView.setImage(image);
                     graphView.setImageDimensions((int) image.getWidth(), (int) image.getHeight());
-                    // Build the graph from the image analysis
-                    ImageGraphBuilder.buildGraph(image, Graph.getInstance());
+                    
+                    // Rebuild the graph
+                    Graph graph = Graph.getInstance();
+                    ImageGraphBuilder.buildGraph(image, graph);
+                    graph.saveInitialState(); // Save the initial state
+                    
                     onLoadComplete.run();
                 }
             });

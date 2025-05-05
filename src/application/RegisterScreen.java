@@ -26,19 +26,20 @@ public class RegisterScreen extends VBox {
         setAlignment(Pos.CENTER);
         getStyleClass().add("register-root");
 
+
         Label titleLabel = new Label("Register");
         titleLabel.getStyleClass().add("title-label");
         //titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 24px;");
 
-        ToggleGroup roleGroup = new ToggleGroup();
-        RadioButton userRadio = new RadioButton("User");
-        userRadio.setToggleGroup(roleGroup);
-        userRadio.setSelected(true);
-        userRadio.getStyleClass().add("radio-button");
+        //ToggleGroup roleGroup = new ToggleGroup();
+        //RadioButton userRadio = new RadioButton("User");
+        //userRadio.setToggleGroup(roleGroup);
+       // userRadio.setSelected(true);
+       // userRadio.getStyleClass().add("radio-button");
         
-        RadioButton adminRadio = new RadioButton("Admin");
-        adminRadio.setToggleGroup(roleGroup);
-        adminRadio.getStyleClass().add("radio-button");
+       // RadioButton adminRadio = new RadioButton("Admin");
+       // adminRadio.setToggleGroup(roleGroup);
+       // adminRadio.getStyleClass().add("radio-button");
         
         //Name Field
         Label nameLabel = new Label("Enter your name:");
@@ -92,7 +93,7 @@ public class RegisterScreen extends VBox {
         Button registerButton = new Button("Register");
         registerButton.getStyleClass().add("register-button");
         registerButton.setOnAction(e -> handleRegister(
-            userRadio.isSelected() ? "User" : "Admin",
+          //  userRadio.isSelected() ? "User" : "Admin",
             nameField.getText(),
             surnameField.getText(),
             emailField.getText(),
@@ -111,7 +112,7 @@ public class RegisterScreen extends VBox {
         loginBox.setSpacing(5);
 
         getChildren().addAll(titleLabel,
-                userRadio, adminRadio,
+                //userRadio, adminRadio,
                 nameLabel, nameField,
                 surnameLabel, surnameField,
                 emailLabel, emailField,
@@ -122,8 +123,9 @@ public class RegisterScreen extends VBox {
                 loginBox);
     }
 
+
     //Registration function
-    private void handleRegister(String role, String name, String surname, String email,String gender, String password, String confirmPassword) {
+    private void handleRegister( String name, String surname, String email,String gender, String password, String confirmPassword) {
     	
     	if (name.isEmpty() || surname.isEmpty() || email.isEmpty() || password.isEmpty()) {
     		showAlert("All fields are required!!");
@@ -136,7 +138,7 @@ public class RegisterScreen extends VBox {
     	}
     	
     	try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.txt",true))){
-    		writer.write(name + "," + surname + "," + email + "," + password + "," + role);
+    		writer.write(name + "," + surname + "," + email + "," + password );
     		writer.newLine();
     		showAlert("Registration Successful! Redirecting to login");
     		openLoginScreen();

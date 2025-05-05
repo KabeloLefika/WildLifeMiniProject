@@ -1,6 +1,6 @@
 /* styles.css */
 
-/* Global Dark Mode */
+/* Dark Mode */
 .root, .dashboard {
     -fx-background-color: #121212;  /* Dark background for the whole app */
     -fx-text-fill: #ffffff;
@@ -45,6 +45,29 @@
     -fx-background-color: transparent;
     -fx-padding: 0 24px;
 }
+
+.welcome-title{
+	
+	-fx-font-size: 36px;
+	-fx-font-weight: bold;
+	-fx-text-fill: #ffffff;
+	-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 6, 0.3, 0, 2);
+	-fx-padding: 16px 0;
+	-fx-alignment: center;
+	
+}
+
+.welcome-subtitle{
+	
+	-fx-font-size: 20px;
+	-fx-font-weight: 500;
+	-fx-text-fill: #bbbbbb;
+	-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 4, 0.3, 0, 1);
+	-fx-padding: 8px 0 24px 0;
+	-fx-alignment: center;
+	
+}
+
 
 /* Metric Cards */
 .metric-box {
@@ -250,4 +273,28 @@
 
 .login-link:hover {
     -fx-text-fill: #00bfa5;
+}
+
+/* Container to make the message visible*/
+.status-container {
+    -fx-background-color: #333333;      
+    -fx-border-color: #FFEB3B;        
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 12px;
+    -fx-spacing: 5px;
+}
+
+/* This is for the label Status Message  */
+.status-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFEB3B;
+}
+
+/* This will be for the message inside */
+.status-message {
+    -fx-font-size: 16px;
+    -fx-text-fill: #ffffff;
 }

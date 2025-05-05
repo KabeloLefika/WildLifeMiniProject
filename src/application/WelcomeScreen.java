@@ -132,7 +132,7 @@ public class WelcomeScreen extends StackPane {
         primaryStage.setScene(loginScene);
         primaryStage.setTitle("Wild Graph - Login"); 
     }
-
+    
     private void showHelpDialog() {
         Stage helpStage = new Stage();
         helpStage.initModality(Modality.APPLICATION_MODAL);

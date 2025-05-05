@@ -7,19 +7,24 @@ import java.util.function.Consumer;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.scene.paint.Color;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GraphView {
     private final Pane graphPane = new Pane();
     private int imageWidth, imageHeight;
-    
     private Consumer<Node> nodeSelectionCallback;
+
+    // Removed text label maps
+    private final Map<Node, Circle> nodeCircles = new HashMap<>();
+    private final Map<Edge, Line> edgeLines = new HashMap<>();
     
     private static final Color CORRIDOR_COLOR = Color.DARKGREEN;
     private static final Color WATER_HIGHLIGHT_COLOR = Color.DARKBLUE;
-
 
     public void enableNodeSelection(Consumer<Node> callback) {
         this.nodeSelectionCallback = callback;
@@ -32,32 +37,32 @@ public class GraphView {
     }
 
     public void update() {
-        graphPane.getChildren().clear();
-        if (imageWidth <= 0 || imageHeight <= 0) return;
-
+        Graph graph = Graph.getInstance();
+        graphPane.getChildren().removeIf(node -> 
+            node instanceof Line || node instanceof Circle
+        );
+        
         double paneWidth = graphPane.getWidth();
         double paneHeight = graphPane.getHeight();
         double scaleX = paneWidth / imageWidth;
         double scaleY = paneHeight / imageHeight;
 
-        // Draw edges with weights
-        for (Edge edge : Graph.getInstance().getEdges()) {
+        // Clear previous mappings
+        nodeCircles.clear();
+        edgeLines.clear();
+
+        // Draw edges without weights
+        for (Edge edge : graph.getEdges()) {
             Line line = createEdgeLine(edge, scaleX, scaleY);
-            Text weightText = createEdgeWeight(edge, scaleX, scaleY);
-            graphPane.getChildren().addAll(line, weightText);
+            edgeLines.put(edge, line);
+            graphPane.getChildren().add(line);
         }
 
-        // Draw nodes with labels
-        int nodeIndex = 0;
-        for (Node node : Graph.getInstance().getNodes()) {
+        // Draw nodes without labels
+        for (Node node : graph.getNodes()) {
             Circle circle = createNodeCircle(node, scaleX, scaleY);
-            Text label = createNodeLabel(node, nodeIndex++, scaleX, scaleY);
-            graphPane.getChildren().addAll(circle, label);
-        }
-        
-        System.out.println("Node positions:");
-        for (Node node : Graph.getInstance().getNodes()) {
-            System.out.println("Node (" + node.getX() + ", " + node.getY() + ")");
+            nodeCircles.put(node, circle);
+            graphPane.getChildren().add(circle);
         }
     }
 
@@ -68,20 +73,9 @@ public class GraphView {
         double endY = edge.getTo().getY() * scaleY;
 
         Line line = new Line(startX, startY, endX, endY);
-        line.setStroke(Color.web("#B0BEC5")); // light gray-blue for nice contrast
-        line.setStrokeWidth(1.0); // make thinner for a cleaner view
+        line.setStroke(Color.web("#B0BEC5"));
+        line.setStrokeWidth(1.0);
         return line;
-    }
-
-
-    private Text createEdgeWeight(Edge edge, double scaleX, double scaleY) {
-        double midX = (edge.getFrom().getX() + edge.getTo().getX()) * scaleX / 2;
-        double midY = (edge.getFrom().getY() + edge.getTo().getY()) * scaleY / 2;
-        
-        Text weightText = new Text(midX, midY, String.format("%.1f", edge.getWeight()));
-        weightText.setFill(Color.RED);
-        weightText.getStyleClass().add("edge-weight");
-        return weightText;
     }
 
     private Circle createNodeCircle(Node node, double scaleX, double scaleY) {
@@ -100,60 +94,40 @@ public class GraphView {
         return circle;
     }
     
-    private void updateNodeAppearance(Node node, Circle circle) {
-        String type = (node instanceof ImageNode) ? 
-            ((ImageNode) node).getType() : "default";
-
-        switch (type) {
-            case "water":
-                circle.setFill(Color.web("#2196F3"));
-                break;
-            case "forest":
-                circle.setFill(Color.web("#43A047"));
-                break;
-            case "land":
-                circle.setFill(Color.web("#A1887F"));
-                break;
-            case "grass":
-                circle.setFill(Color.web("#8BC34A"));
-                break;
-            case "poacher":
-                circle.setFill(Color.web("#FF0000")); 
-                break;
-            default:
-                circle.setFill(Color.web("#FF5722"));
+    public void highlightStartNode(Node node) {
+        Circle circle = nodeCircles.get(node);
+        if (circle != null) {
+            circle.setFill(Color.GREEN);
         }
-
-        circle.setStroke(Color.BLACK);
-        circle.setStrokeWidth(1.5);
     }
 
-
-    private Text createNodeLabel(Node node, int index, double scaleX, double scaleY) {
-        double x = node.getX() * scaleX + 5;
-        double y = node.getY() * scaleY + 5;
-
-        Text label = new Text(x, y, String.valueOf(index));
-        label.setFill(Color.web("#212121")); // dark text
-        label.setStyle("-fx-font-size: 10px;");
-        return label;
+    public void highlightEndNode(Node node) {
+        Circle circle = nodeCircles.get(node);
+        if (circle != null) {
+            circle.setFill(Color.RED);
+        }
     }
 
+    public void clearNodeHighlights() {
+        for (Node node : nodeCircles.keySet()) {
+            Circle circle = nodeCircles.get(node);
+            updateNodeAppearance(node, circle);
+        }
+    }
+
+    
 
     public Pane getView() {
         graphPane.setMinSize(400, 300);
         graphPane.setStyle("-fx-background-color: #263238; -fx-border-color: #cccccc; -fx-border-width: 1;");
         
-        // Add responsive listeners
         graphPane.widthProperty().addListener((obs, oldVal, newVal) -> update());
-      //  graphPane.setStyle("-fx-background-color: #263238;"); // dark blue-gray background
-
         graphPane.heightProperty().addListener((obs, oldVal, newVal) -> update());
         
         return graphPane;
     }
     
- // Add to GraphView.java
+ // In GraphView.java
     public void highlightPath(List<Node> path) {
         clearHighlights();
         
@@ -172,39 +146,64 @@ public class GraphView {
                 );
                 line.setStroke(Color.RED);
                 line.setStrokeWidth(4);
-                line.getStyleClass().add("path-highlight");
+                line.getStyleClass().add("path-highlight"); // Add this line
                 graphPane.getChildren().add(line);
             });
         }
     }
     
+    
+    
     public void appendPathHighlight(List<Node> path) {
-        // Do not clear previous highlights; simply draw additional lines.
         if (path == null || path.size() < 2) return;
-        double scaleX = graphPane.getWidth() / (double) imageWidth;
-        double scaleY = graphPane.getHeight() / (double) imageHeight;
         
-        // Draw the path segments without clearing the pane.
+        double scaleX = graphPane.getWidth() / imageWidth;
+        double scaleY = graphPane.getHeight() / imageHeight;
+        
+        // Use more visible path styling
+        Color pathColor = Color.rgb(255, 165, 0, 0.9); // Brighter orange
+        double strokeWidth = 6.0;
+
         for (int i = 0; i < path.size() - 1; i++) {
             Node current = path.get(i);
             Node next = path.get(i + 1);
+
+            Line line = new Line(
+                current.getX() * scaleX,
+                current.getY() * scaleY,
+                next.getX() * scaleX,
+                next.getY() * scaleY
+            );
             
-            // Find the connection edge (if one exists) between current and next.
-            Optional<Edge> connection = Graph.getInstance().getEdges().stream()
-                .filter(e -> e.getFrom().equals(current) && e.getTo().equals(next))
-                .findFirst();
-            
-            connection.ifPresent(edge -> {
-                Line line = createEdgeLine(edge, scaleX, scaleY);
-                line.setStroke(Color.RED);  // You can update the color per path if needed.
-                line.setStrokeWidth(4);
-                line.getStyleClass().add("path-highlight");
-                graphPane.getChildren().add(line);
-            });
+            line.setStroke(pathColor);
+            line.setStrokeWidth(strokeWidth);
+            line.setStrokeLineCap(StrokeLineCap.ROUND);
+            line.getStyleClass().add("poacher-path");
+            graphPane.getChildren().add(line); // Add to end (top of z-order) // Ensure paths are behind nodes
         }
     }
-
-
+    
+    public void updateNodeAppearance(Node node) {
+        Circle circle = nodeCircles.get(node);
+        if (circle != null) {
+            updateNodeAppearance(node, circle);
+        }
+    }
+    
+    public void highlightCriticalNode(Node node) {
+        double scaleX = graphPane.getWidth() / imageWidth;
+        double scaleY = graphPane.getHeight() / imageHeight;
+        
+        Circle highlight = new Circle(
+            node.getX() * scaleX,
+            node.getY() * scaleY,
+            10,  // Larger radius for critical nodes
+            Color.TRANSPARENT
+        );
+        highlight.setStroke(Color.GOLD);
+        highlight.setStrokeWidth(3);
+        graphPane.getChildren().add(highlight);
+    }
     
     public void highlightMST(List<Edge> mstEdges, Set<Node> criticalWater) {
         clearHighlights();
@@ -237,14 +236,42 @@ public class GraphView {
             graphPane.getChildren().add(highlight);
         }
     }
+    
+    private void updateNodeAppearance(Node node, Circle circle) {
+        String type = (node instanceof ImageNode) ? 
+            ((ImageNode) node).getType() : "default";
 
-    // Update clearHighlights
+        switch (type) {
+            case "water":
+                circle.setFill(Color.web("#2196F3"));
+                break;
+            case "forest":
+                circle.setFill(Color.web("#43A047"));
+                break;
+            case "land":
+                circle.setFill(Color.web("#A1887F"));
+                break;
+            case "grass":
+                circle.setFill(Color.web("#8BC34A"));
+                break;
+            case "poacher":
+                circle.setFill(Color.web("#FF0000")); 
+                break;
+            default:
+                circle.setFill(Color.web("#FF5722"));
+        }
+
+        //circle.setStroke(Color.BLACK);
+        circle.setStrokeWidth(1.5);
+    }
+
     void clearHighlights() {
         graphPane.getChildren().removeIf(node -> 
             node.getStyleClass().contains("path-highlight") ||
             node.getStyleClass().contains("mst-highlight") ||
-            node.getStyleClass().contains("water-highlight")
+            node.getStyleClass().contains("water-highlight") ||
+            node.getStyleClass().contains("poacher-path")
         );
     }
-
+   
 }

@@ -71,15 +71,8 @@ public class LoginScreen extends VBox{
         registerBox.setSpacing(5);
 
         getChildren().addAll(titleLabel, emailLabel, emailField, passwordLabel, passwordField, loginButton, registerBox);
-	    
-        //Scene scene = new Scene(this,600,500);
-        //scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-       // primaryStage.setScene(scene);
-        //primaryStage.setTitle("Wild Graph - Login");
-        
-        
-	}
 
+	}
 	    private void handleLogin(String email, String password) {
 	        if(email.isEmpty() || password.isEmpty()) {
 	        	showAlert("Please enter email and password.");
