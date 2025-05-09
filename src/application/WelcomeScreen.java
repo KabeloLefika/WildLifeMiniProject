@@ -66,6 +66,7 @@ public class WelcomeScreen extends StackPane {
             //primaryStage.setTitle("Wild Graph - Dashboard");
         //});
         Button helpButton = createButton("Help", "#2196F3", "#1976D2");
+        helpButton.setOnAction(e -> showHelpDialog());
 
         buttonBox.getChildren().addAll(loginButton, helpButton);
 
@@ -141,17 +142,33 @@ public class WelcomeScreen extends StackPane {
         Label helpText = new Label("""
             Welcome to Wild Graph!
             
-            • Click 'Login' to access advanced features
-            • Use 'Help' to view this guide anytime
-            • Explore wildlife data visualization tools
+            Instructions:
+            1. Click 'Login' to enter your credentials and access the main dashboard.
+            2. Otherwise Register a new user if not registered and then login.
+            3. On the dashboard, you can:
+        	   - Upload an image by clicking "Map Viewer" which will be converted to a network graph.
+        	   - Find shortest path from one point on the map to another point avoiding rivers.
+               - View and manage wildlife corridors.
+               - Analyze critical paths and terrain types.
+               - Use tools to add landmarks(water, land, trees). 
+            4. To return to this screen, log out from the dashboard.
             """);
-        helpText.getStyleClass().add("help-text");
+        helpText.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Segoe UI';");
         helpText.setWrapText(true);
         helpText.setMaxWidth(600);
-        helpText.setPadding(new Insets(40));
+        
+        VBox contentBox = new VBox(helpText);
+        contentBox.setAlignment(Pos.CENTER);
+        contentBox.setPadding(new Insets(40));
+        contentBox.setStyle("-fx-background-color: black;");
+        
+        ScrollPane scrollPane = new ScrollPane(contentBox);
+        scrollPane.setFitToWidth(true);
+        //scrollPane.setPadding(new Insets(10));
+        scrollPane.setStyle("-fx-background: black; -fx-background-color: black");
 
-        Scene helpScene = new Scene(helpText, 800, 600);
-        helpScene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        Scene helpScene = new Scene(scrollPane, 500, 400);
+        //helpScene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
         helpStage.setScene(helpScene);
         helpStage.show();
     }
